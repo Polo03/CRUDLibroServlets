@@ -20,29 +20,33 @@ public class LibroServlet extends HttpServlet {
         response.setContentType("text/html");
         PrintWriter out = response.getWriter();
 
-        LibroDAO libroDAO = new LibroDAO();
+        LibroDAO dao = new LibroDAO();
 
         try {
             switch (accion) {
                 case "insertar":
-                    libroDAO.insertarLibro(new Libro(isbn, titulo, autor));
+                    dao.addLibro(new Libro(isbn, titulo, autor));
                     out.println("<p>Libro insertado correctamente.</p>");
                     break;
                 case "actualizar":
-                    libroDAO.actualizarLibro(new Libro(isbn, titulo, autor));
+                    dao.updateLibro(new Libro(isbn, titulo, autor));
                     out.println("<p>Libro actualizado correctamente.</p>");
                     break;
                 case "eliminar":
-                    libroDAO.eliminarLibro(isbn);
+                    dao.deleteLibro(dao.getLibroByIsbn(isbn));
                     out.println("<p>Libro eliminado correctamente.</p>");
                     break;
-                case "leer":
-                    Libro libro = libroDAO.leerLibro(isbn);
-                    out.println("<p>Libro: " + libro + "</p>");
+                case "leerPorIsbn":
+                    Libro libroIsbn = dao.getLibroByIsbn(isbn);
+                    out.println("<p>Libro: " + libroIsbn + "</p>");
+                    break;
+                case "leerPorTitulo":
+                    Libro libroTitulo = dao.getLibroByTitulo(titulo);
+                    out.println("<p>Libro: " + libroTitulo + "</p>");
                     break;
                 case "leerTodos":
                     out.println("<h3>Todos los Libros:</h3>");
-                    for (Libro l : libroDAO.leerTodosLosLibros()) {
+                    for (Libro l : dao.getAllLibros()) {
                         out.println("<p>" + l + "</p>");
                     }
                     break;

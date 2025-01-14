@@ -1,70 +1,49 @@
 package Modelo;
 
+import jakarta.persistence.*;
 
-import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 
 public class LibroDAO {
-
-    private Connection getConexion() throws SQLException {
-        String url = "jdbc:mariadb://localhost:3306/biblioteca";
-        String usuario = "Carlos";
-        String contraseña = "123";
-        return DriverManager.getConnection(url, usuario, contraseña);
+    EntityManagerFactory emf = Persistence.createEntityManagerFactory("unidad-biblioteca");
+    EntityManager em = emf.createEntityManager();
+    EntityTransaction tx = em.getTransaction();
+    //INSERT
+    public boolean addLibro(Libro libro){
+        tx.begin();
+        em.persist(libro);
+        tx.commit();
+        return false;
     }
 
-    public void insertarLibro(Libro libro) throws SQLException {
-        String sql = "INSERT INTO libro (isbn, titulo, autor) VALUES (?, ?, ?)";
-        try (Connection con = getConexion(); PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, libro.getIsbn());
-            ps.setString(2, libro.getTitulo());
-            ps.setString(3, libro.getAutor());
-            ps.executeUpdate();
-        }
+    //SELECT WHERE ID
+    public Libro getLibroByIsbn(String isbn){
+        return em.find(Libro.class, isbn);
     }
 
-    public void actualizarLibro(Libro libro) throws SQLException {
-        String sql = "UPDATE libro SET titulo = ?, autor = ? WHERE isbn = ?";
-        try (Connection con = getConexion(); PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, libro.getTitulo());
-            ps.setString(2, libro.getAutor());
-            ps.setString(3, libro.getIsbn());
-            ps.executeUpdate();
-        }
+    //SELECT WHERE DNI
+    public Libro getLibroByTitulo(String titulo){
+        Query consulta = em.createQuery("SELECT l from Libro l WHERE l.titulo=:titulo");
+        consulta.setParameter("titulo",titulo);
+        return (Libro) consulta.getSingleResult();
+    }
+    //SELECT *
+    public List<Libro> getAllLibros(){
+        return em.createQuery("SELECT l FROM Libro l").getResultList();
     }
 
-    public void eliminarLibro(String isbn) throws SQLException {
-        String sql = "DELETE FROM libro WHERE isbn = ?";
-        try (Connection con = getConexion();
-            PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, isbn);
-            ps.executeUpdate();
-        }
+    //UPDATE
+    public Libro updateLibro(Libro libro){
+        tx.begin();
+        libro = em.merge(libro);
+        tx.commit();
+        return libro;
     }
-
-    public Libro leerLibro(String isbn) throws SQLException {
-        String sql = "SELECT * FROM libro WHERE isbn = ?";
-        try (Connection con = getConexion(); PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, isbn);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return new Libro(rs.getString("isbn"), rs.getString("titulo"), rs.getString("autor"));
-                }
-            }
-        }
-        return null;
-    }
-
-    public List<Libro> leerTodosLosLibros() throws SQLException {
-        List<Libro> libros = new ArrayList<>();
-        String sql = "SELECT * FROM libro";
-        try (Connection con = getConexion(); Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
-            while (rs.next()) {
-                libros.add(new Libro(rs.getString("isbn"), rs.getString("titulo"), rs.getString("autor")));
-            }
-        }
-        return libros;
+    //DELETE WHERE libro.isbn
+    public boolean deleteLibro(Libro libro){
+        tx.begin();
+        em.remove(libro);
+        tx.commit();
+        return true;
     }
 }
-
