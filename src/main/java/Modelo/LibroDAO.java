@@ -23,9 +23,7 @@ public class LibroDAO {
 
     //SELECT WHERE DNI
     public Libro getLibroByTitulo(String titulo){
-        Query consulta = em.createQuery("SELECT l from Libro l WHERE l.titulo=:titulo");
-        consulta.setParameter("titulo",titulo);
-        return (Libro) consulta.getSingleResult();
+        return em.find(Libro.class, titulo);
     }
     //SELECT *
     public List<Libro> getAllLibros(){
