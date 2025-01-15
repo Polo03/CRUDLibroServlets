@@ -15,7 +15,7 @@ import java.util.List;
 @WebServlet(name = "libroServlet", value = "/libroServlet")
 public class LibroServlet extends HttpServlet {
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String accion = request.getParameter("accion");
         String isbn = request.getParameter("isbn");
         String titulo = request.getParameter("titulo");
